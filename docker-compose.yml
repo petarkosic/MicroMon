@@ -42,9 +42,10 @@ services:
       - micromon
 
   nginx:
+    container_name: nginx
     image: nginx:latest
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - users-1
       - users-2
@@ -55,5 +56,39 @@ services:
     networks:
       - micromon
 
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - users-1
+      - users-2
+      - posts-1
+      - posts-2
+    networks:
+      - micromon
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    ports:
+      - '3000:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/datasource.yml:/etc/grafana/provisioning/datasources/prometheus-datasource.yml
+    depends_on:
+      - prometheus
+    networks:
+      - micromon
+
 networks:
   micromon:
+
+volumes:
+  grafana-data:
