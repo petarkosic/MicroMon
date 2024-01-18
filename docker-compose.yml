@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  users-1:
+    container_name: users-1
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3001
+    networks:
+      - micromon
+
+  users-2:
+    container_name: users-2
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3001
+    networks:
+      - micromon
+
+  posts-1:
+    container_name: posts-1
+    build:
+      context: ./posts
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3002
+    networks:
+      - micromon
+
+  posts-2:
+    container_name: posts-2
+    build:
+      context: ./posts
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3002
+    networks:
+      - micromon
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - users-1
+      - users-2
+      - posts-1
+      - posts-2
+    ports:
+      - '8080:80'
+    networks:
+      - micromon
+
+networks:
+  micromon:
